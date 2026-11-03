@@ -1,0 +1,15 @@
+{
+  "info": {
+    "_postman_id": "9c7de1b7-e166-45ad-9064-63cbcc22ea3a",
+    "name": "TestTrace application health",
+    "description": "A small Newman suite for the TestTrace health endpoint.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health endpoint returns ready",
+      "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api", "health"] } },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": ["pm.test('health endpoint responds with HTTP 200', function () {", "  pm.response.to.have.status(200);", "});", "pm.test('health status is ready', function () {", "  pm.expect(pm.response.json().status).to.eql('ok');", "});"] } }]
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+name: TestTrace automation
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: TestTrace run identifier
+        required: true
+        type: string
+      project_id:
+        description: TestTrace workspace identifier
+        required: true
+        type: string
+      test_case_ids:
+        description: Comma separated test case identifiers
+        required: true
+        type: string
+      source:
+        description: Automation engine
+        required: true
+        type: choice
+        options:
+          - playwright
+          - selenium
+          - newman
+
+permissions:
+  contents: read
+
+concurrency:
+  group: testtrace-${{ inputs.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  execute:
+    name: Run ${{ inputs.source }} suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out automation collections
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install application and automation dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium
+        if: inputs.source == 'playwright'
+        run: npx playwright install --with-deps chromium
+      - name: Run selected test cases
+        run: node automation/runner.mjs
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+          PROJECT_ID: ${{ inputs.project_id }}
+          TEST_CASE_IDS: ${{ inputs.test_case_ids }}
+          AUTOMATION_SOURCE: ${{ inputs.source }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
+          E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
