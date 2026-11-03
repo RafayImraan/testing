@@ -60,8 +60,7 @@ async function runPlaywright(testCase, baseUrl) {
         if (!text.includes(value)) throw new Error(`Expected text was not found: ${value}`);
       } else if (step.action === "expect_url") {
         const expected = new URL(value, baseUrl).pathname.replace(/\/$/, "") || "/";
-        const actual = new URL(page.url()).pathname.replace(/\/$/, "") || "/";
-        if (actual !== expected) throw new Error(`Expected URL path ${expected}, received ${actual}`);
+        await page.waitForURL(url => (url.pathname.replace(/\/$/, "") || "/") === expected, { timeout: step.timeout || 30000 });
       } else if (step.action === "expect_visible") {
         await selector.waitFor({ state: "visible", timeout: step.timeout || 10000 });
       } else if (step.action === "wait") await page.waitForTimeout(Math.min(Number(value) || 500, 10000));
@@ -93,8 +92,10 @@ async function runSelenium(testCase, baseUrl) {
         if (!text.includes(value)) throw new Error(`Expected text was not found: ${value}`);
       } else if (step.action === "expect_url") {
         const expected = new URL(value, baseUrl).pathname.replace(/\/$/, "") || "/";
-        const actual = new URL(await driver.getCurrentUrl()).pathname.replace(/\/$/, "") || "/";
-        if (actual !== expected) throw new Error(`Expected URL path ${expected}, received ${actual}`);
+        await driver.wait(async () => {
+          const actual = new URL(await driver.getCurrentUrl()).pathname.replace(/\/$/, "") || "/";
+          return actual === expected;
+        }, step.timeout || 30000, `Expected URL path ${expected}`);
       } else if (step.action === "expect_visible") { if (!(await el.isDisplayed())) throw new Error(`Element was not visible: ${step.selector}`); }
       else if (step.action === "wait") await new Promise(resolve => setTimeout(resolve, Math.min(Number(value)||500,10000)));
       else throw new Error(`Unsupported Selenium action: ${step.action}`);
