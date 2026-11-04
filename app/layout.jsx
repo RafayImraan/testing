@@ -1,4 +1,5 @@
 import "./styles.css";
+import "./theme.css";
 
 export const metadata = {
   title: "TestTrace — Quality, in focus",

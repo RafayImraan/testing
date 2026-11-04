@@ -1,0 +1,266 @@
+:root {
+  color-scheme: dark;
+  --ink: #eef2f6;
+  --muted: #a3adba;
+  --line: #282d35;
+  --surface: #111419;
+  --canvas: #080a0d;
+  --green: #62d5aa;
+  --navy: #eef2f6;
+  --blue: #8eafff;
+  --soft-blue: #1b2432;
+  --shadow: 0 8px 28px rgba(0, 0, 0, .22);
+}
+
+html,
+body {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+::selection { background: #27634f; color: #fff; }
+
+.sidebar,
+.topbar,
+.user-card,
+.project-select,
+.project-menu,
+.project-menu button,
+.search-trigger,
+.period-select,
+.button-secondary,
+.stat-card,
+.panel,
+.usage-card,
+.modal,
+.toast,
+.notification-popover,
+.notification-item,
+.cycle-card,
+.task-card,
+.trace-table,
+.auth-card,
+.member-row,
+.runner-help,
+.run-confirm-list,
+.multi-picker,
+.cycle-footer select,
+.cycle-footer button,
+.inline-select,
+.loading-screen button {
+  background-color: var(--surface);
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.main,
+.page-content,
+.app-shell,
+.auth-page,
+.loading-screen { background: var(--canvas); color: var(--ink); }
+
+.brand,
+.auth-brand,
+.project-copy b,
+.user-copy b,
+.breadcrumbs b,
+.page-heading h1,
+.panel-heading h2,
+.section-hero h2,
+.section-info h3,
+.cycle-card h2,
+.modal h2,
+.auth-heading h1,
+.stat-value,
+.progress-ring b,
+.case-title b,
+.task-copy b,
+.task-card > b,
+.toast b,
+.cycle-breakdown b,
+.chart-legend b,
+.table-footer b,
+.usage-card strong,
+.empty-state > b,
+.schedule-setting b {
+  color: #f1f4f8;
+}
+
+.brand-mark,
+.button-primary {
+  background: #28654f;
+  border-color: #367d62;
+  color: #f3fff9;
+}
+.button-primary:hover { background: #34775d; }
+.button-secondary:hover,
+.nav-item:hover,
+.project-menu button:hover,
+.project-menu button.selected { background: #1b2027; }
+
+.nav-item { color: #adb7c4; }
+.nav-item.active,
+.filter-tabs button.selected { background: #18352b; color: #83e4bd; }
+.nav-count,
+.search-trigger kbd { background: #20252d; color: #c0c8d2; }
+.project-icon,
+.section-icon,
+.auth-emblem,
+.modal-icon,
+.empty-state-icon,
+.tinted-icon,
+.stat-icon,
+.task-check,
+.toast-icon { background: #1b2b25; color: #83dfb8; }
+.section-info.tinted,
+.runner-help,
+.automation-config { background: #121a17; }
+.usage-card { background: #10151a; }
+.kanban-column { background: #111419; border-color: #282d35; }
+.kanban-head span { background: #252b33; color: #d5dbe3; }
+.linked-case-list span,
+.role-pill { background: #20262e; color: #d2dae4; border-color: #303741; }
+.runner-secret-list code { background: #171c21; color: #a9e5ca; border-color: #303741; }
+.modal-fields .code-input { background: #0a0d10; }
+.activity-strip { background: #111419; }
+.run-evidence button { background: #171b20; color: #d5dbe3; border-color: #303741; }
+
+.eyebrow,
+.nav-label,
+.stat-head,
+.stat-foot,
+.panel-heading p,
+.page-heading p,
+.breadcrumbs,
+.project-copy small,
+.user-copy small,
+.info-kicker,
+.section-hero p,
+.section-info p,
+.page-footer,
+.empty-state,
+.empty-inline,
+.chart-legend span,
+.status-bar-row,
+.cycle-footer,
+.cycle-breakdown div,
+.task-copy span,
+.task-card p,
+.task-card-footer,
+.updated-cell,
+.case-id,
+.module-tag,
+.priority,
+.auth-heading p,
+.auth-form label,
+.auth-switch,
+.auth-trust,
+.modal p,
+.modal label,
+.modal-fields label small,
+.schedule-setting small,
+.activity-strip,
+.activity-strip-title,
+.activity-strip small,
+.loading-screen,
+.project-menu small,
+.toast span,
+.run-confirm-list {
+  color: #a3adba;
+}
+
+.page-heading h1 { letter-spacing: -.45px; }
+.page-content { padding-top: 30px; }
+.panel, .stat-card { border-radius: 12px; }
+.button { min-height: 38px; font-size: 12px; }
+.nav-item { min-height: 40px; font-size: 13px; }
+.page-heading p, .section-hero p, .section-info p { font-size: 13px; }
+
+.topbar,
+.sidebar,
+.top-divider,
+.panel,
+.stat-card,
+.usage-card,
+.activity-strip,
+.cycle-card-footer,
+.task-row,
+.table-wrap td,
+.table-wrap th,
+.modal-actions,
+.auth-trust,
+.user-card { border-color: #282d35; }
+
+thead th { background: #191d23; color: #b6c0cc; border-color: #2b313a; }
+td { color: #c0c8d2; border-color: #252a31; }
+.case-title b { color: #eef2f6; }
+.module-tag { background: #181c22; border-color: #303640; color: #c1cad5; }
+.status.pending, .cycle-state, .cycle-state.archived, .cycle-state.deprecated, .cycle-state.closed { background: #252a32; color: #c0c8d2; }
+.status.passed, .cycle-state.active, .cycle-state.approved, .cycle-state.implemented { background: #153327; color: #7fe0b6; }
+.status.failed { background: #351d1d; color: #ff9a8d; }
+.status.in-progress, .cycle-state.planned, .cycle-state.draft, .cycle-state.open { background: #332a17; color: #f0cf7c; }
+.status.blocked { background: #28233a; color: #c2b1ff; }
+.run-source { background: #1c2634; color: #adc6ff; }
+.run-source.newman { background: #30251a; color: #f0c18c; }
+.run-source.selenium { background: #28223a; color: #c5b4ff; }
+.status-bars .status-bar-track,
+.progress-line,
+.usage-meter { background: #282e36; }
+.cycle-progress .progress-ring circle { stroke: #29312f; }
+.cycle-card-footer select,
+.cycle-card-footer button,
+.inline-select { background: #171b20; border-color: #323842; color: #d0d6de; }
+
+input,
+select,
+textarea,
+.list-search input,
+.auth-form input,
+.modal input,
+.modal select,
+.modal textarea,
+.settings-form input,
+.settings-form textarea,
+.member-add-form input,
+.member-add-form select {
+  background-color: #0c0f13;
+  color: #eef2f6;
+  border-color: #303741;
+}
+input::placeholder,
+textarea::placeholder { color: #7f8a98; }
+input[type="checkbox"] { accent-color: #62d5aa; }
+input:focus-visible, select:focus-visible, textarea:focus-visible,
+button:focus-visible { outline-color: #68d9b0; }
+
+.auth-page {
+  background: radial-gradient(ellipse at 50% 8%, #14231c 0, transparent 48%), #080a0d;
+}
+.auth-card { width: min(100%, 460px); padding: 34px; border-radius: 16px; box-shadow: 0 24px 70px rgba(0,0,0,.35); }
+.auth-heading h1 { color: #f1f4f8; }
+.auth-emblem { margin-top: 24px; }
+.auth-form label { font-size: 12px; }
+.auth-form input { height: 44px; font-size: 13px; }
+.auth-switch button, .auth-alert code { color: #83e4bd; }
+.auth-alert, .form-alert { background: #2a2418; color: #f0d38d; border-color: #574626; }
+.form-alert.error-alert { background: #321e1e; color: #ffaaa0; border-color: #603330; }
+.form-alert.success-alert { background: #153327; color: #93e6bf; border-color: #275c45; }
+.auth-trust { color: #a3adba; }
+
+.modal-backdrop { background: rgba(0, 0, 0, .72); }
+.notification-item:hover,
+.task-card:hover,
+.cycle-card:hover { background-color: #171c22; }
+.notification-item:hover { color: #eef2f6; }
+.notification-head,
+.notification-list,
+.notification-item,
+.project-menu button.new-project-option { border-color: #2a3038; }
+.danger-icon { color: #ff9388 !important; }
+.empty-state p { color: #a3adba; }
+.toast { box-shadow: 0 16px 40px rgba(0,0,0,.4); }
+
+@media (max-width: 620px) {
+  .auth-card { padding: 26px 21px; }
+  .button { min-height: 40px; }
+}
