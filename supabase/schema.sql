@@ -63,11 +63,13 @@ create table if not exists public.cycle_test_cases (
 create table if not exists public.test_runs (
   id uuid primary key default gen_random_uuid(), project_id uuid not null references public.projects(id) on delete cascade,
   cycle_id uuid references public.test_cycles(id) on delete set null, triggered_by uuid references auth.users(id) on delete set null,
-  source text not null default 'manual' check(source in ('manual','playwright','selenium','newman','schedule')),
+  source text not null default 'manual' check(source in ('manual','playwright','selenium','newman','schedule','website')),
   status text not null default 'queued' check(status in ('queued','running','passed','failed','cancelled')),
   branch text, commit_sha text, started_at timestamptz, finished_at timestamptz,
   summary jsonb not null default '{}'::jsonb, worker_run_id text, created_at timestamptz not null default now()
 );
+alter table public.test_runs drop constraint if exists test_runs_source_check;
+alter table public.test_runs add constraint test_runs_source_check check(source in ('manual','playwright','selenium','newman','schedule','website'));
 create table if not exists public.test_results (
   id uuid primary key default gen_random_uuid(), run_id uuid not null references public.test_runs(id) on delete cascade,
   test_case_id uuid references public.test_cases(id) on delete set null,

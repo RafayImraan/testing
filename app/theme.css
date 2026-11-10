@@ -264,3 +264,5 @@ button:focus-visible { outline-color: #68d9b0; }
   .auth-card { padding: 26px 21px; }
   .button { min-height: 40px; }
 }
+
+.website-scan-input{display:grid;gap:7px;margin-top:14px;font-size:12px}.website-scan-input input{width:min(520px,70vw);padding:10px 12px;border:1px solid #dbe2ea;border-radius:8px;background:#fff;color:#172033}.website-check-details{grid-column:1/-1;font-size:12px}.website-check-details summary{cursor:pointer;color:#64748b}.website-check-details div{display:grid;gap:3px;padding:7px 0}.website-check-details small{color:#64748b}

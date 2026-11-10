@@ -12,7 +12,7 @@ const projectId = process.env.PROJECT_ID;
 const caseIds = (process.env.TEST_CASE_IDS || "").split(",").filter(Boolean);
 const source = process.env.AUTOMATION_SOURCE || "playwright";
 const root = process.cwd();
-if (!api || !serviceKey || !runId || !projectId || !caseIds.length) throw new Error("Automation runner configuration is incomplete.");
+if (!api || !serviceKey || !runId || !projectId || (source !== "website" && !caseIds.length)) throw new Error("Automation runner configuration is incomplete.");
 
 async function rest(table, options = {}) {
   const { method = "GET", query = "", body, headers = {} } = options;
@@ -119,15 +119,54 @@ function runNewman(testCase, baseUrl) {
   }));
 }
 
+async function scanWebsite(baseUrl) {
+  const browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  const consoleErrors = [];
+  page.on("pageerror", error => consoleErrors.push(error.message));
+  page.on("console", message => { if (message.type() === "error") consoleErrors.push(message.text()); });
+  const checks = [];
+  try {
+    const response = await page.goto(baseUrl, { waitUntil: "domcontentloaded", timeout: 30000 });
+    checks.push({name:"Page responds", passed:!!response && response.status() < 400, detail:response ? `HTTP ${response.status()}` : "No response"});
+    const title = (await page.title()).trim();
+    checks.push({name:"Page has a title", passed:!!title, detail:title || "No page title found"});
+    const origin = new URL(page.url()).origin;
+    const links = await page.locator("a[href]").evaluateAll(nodes => [...new Set(nodes.map(node => node.href))]);
+    const internal = links.filter(href => { try { return new URL(href).origin === origin; } catch { return false; } }).slice(0, 30);
+    const brokenLinks = [];
+    for (const href of internal) {
+      try {
+        const linkResponse = await page.request.get(href, { timeout: 10000, maxRedirects: 3 });
+        if (linkResponse.status() >= 400) brokenLinks.push({url:href,status:linkResponse.status()});
+      } catch (error) { brokenLinks.push({url:href,error:error.message}); }
+    }
+    checks.push({name:"Internal links respond", passed:brokenLinks.length === 0, detail:`Checked ${internal.length} links${brokenLinks.length ? `; ${brokenLinks.length} failed` : ""}`, failures:brokenLinks});
+    checks.push({name:"No browser JavaScript errors", passed:consoleErrors.length === 0, detail:consoleErrors.length ? consoleErrors.slice(0, 10).join("; ") : "No errors detected", errors:consoleErrors.slice(0, 10)});
+  } catch (error) {
+    checks.push({name:"Page loads", passed:false, detail:error.message});
+  } finally { await browser.close(); }
+  return checks;
+}
+
 let run;
 try {
   [run] = await rest("test_runs",{query:`?id=eq.${encodeURIComponent(runId)}&project_id=eq.${encodeURIComponent(projectId)}&select=*,projects(id,automation_base_url),test_results(id)`});
   if (!run) throw new Error("The selected test run is no longer available.");
   const baseUrl=run.projects?.automation_base_url;
   if (!baseUrl) throw new Error("Set the automation target URL in TestTrace workspace settings before starting a run.");
-  const cases=await rest("test_cases",{query:`?project_id=eq.${encodeURIComponent(projectId)}&id=in.(${caseIds.map(encodeURIComponent).join(",")})&select=*`});
+  const cases=source === "website" ? [] : await rest("test_cases",{query:`?project_id=eq.${encodeURIComponent(projectId)}&id=in.(${caseIds.map(encodeURIComponent).join(",")})&select=*`});
   if(cases.length!==caseIds.length)throw new Error("One or more selected test cases are missing.");
   await rest("test_runs",{method:"PATCH",query:`?id=eq.${encodeURIComponent(runId)}`,body:{status:"running",started_at:new Date().toISOString()},headers:{Prefer:"return=minimal"}});
+  if (source === "website") {
+    const checks = await scanWebsite(baseUrl);
+    const passed = checks.filter(check => check.passed).length;
+    const failed = checks.length - passed;
+    await rest("test_results",{method:"POST",body:{run_id:runId,test_case_id:null,status:failed?"failed":"passed",error_message:failed?checks.filter(check=>!check.passed).map(check=>`${check.name}: ${check.detail}`).join(" | "):null,evidence:[]}});
+    const summary={total:checks.length,passed,failed,checks};
+    await rest("test_runs",{method:"PATCH",query:`?id=eq.${encodeURIComponent(runId)}`,body:{status:failed?"failed":"passed",finished_at:new Date().toISOString(),summary},headers:{Prefer:"return=minimal"}});
+    if(failed)process.exitCode=1;
+  } else {
   const outcomes=[];
   for(const testCase of cases){
     const started=Date.now();let outcome;
@@ -147,6 +186,7 @@ try {
   const summary={total:outcomes.length,passed:outcomes.filter(x=>x.status==="passed").length,failed:outcomes.filter(x=>x.status==="failed").length,results:outcomes};
   await rest("test_runs",{method:"PATCH",query:`?id=eq.${encodeURIComponent(runId)}`,body:{status:summary.failed?"failed":"passed",finished_at:new Date().toISOString(),summary},headers:{Prefer:"return=minimal"}});
   if(summary.failed)process.exitCode=1;
+  }
 }catch(error){
   console.error(error);
   if(run?.id)try{await rest("test_runs",{method:"PATCH",query:`?id=eq.${encodeURIComponent(runId)}`,body:{status:"failed",finished_at:new Date().toISOString(),summary:{error:error.message}},headers:{Prefer:"return=minimal"}})}catch(updateError){console.error("Could not store runner failure:",updateError.message)}

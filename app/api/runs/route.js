@@ -24,13 +24,17 @@ export async function POST(request) {
     if (authError || !user) return fail("Sign in to run tests.", 401);
     const body = await request.json();
     if (!body.projectId) return fail("Choose a workspace.");
+    const source = body.source === "website" ? "website" : (["playwright","selenium","newman"].includes(body.source) ? body.source : "manual");
     const caseIds = [...new Set(body.caseIds || [])].slice(0, 25);
-    if (!caseIds.length) return fail("Select at least one test case.");
-    const source = ["playwright","selenium","newman"].includes(body.source) ? body.source : "manual";
-    const { data: cases, error: casesError } = await supabase.from("test_cases").select("id,automation_type").eq("project_id", body.projectId).in("id", caseIds);
-    if (casesError) throw casesError;
-    if (!cases?.length || cases.length !== caseIds.length) return fail("One or more selected test cases are unavailable in this workspace.", 403);
-    if (source !== "manual" && cases.some(testCase => testCase.automation_type !== source)) return fail("Every selected case must use the selected automation type.");
+    if (source !== "website" && !caseIds.length) return fail("Select at least one test case.");
+    let cases = [];
+    if (source !== "website") {
+      const { data, error } = await supabase.from("test_cases").select("id,automation_type").eq("project_id", body.projectId).in("id", caseIds);
+      if (error) throw error;
+      cases = data || [];
+      if (!cases.length || cases.length !== caseIds.length) return fail("One or more selected test cases are unavailable in this workspace.", 403);
+      if (source !== "manual" && cases.some(testCase => testCase.automation_type !== source)) return fail("Every selected case must use the selected automation type.");
+    }
 
     if (source === "manual") {
       const results = Array.isArray(body.results) ? body.results : [];
@@ -57,7 +61,15 @@ export async function POST(request) {
     if (!owner || !repository || !token) return fail("The automation runner has not been connected in deployment settings.", 503);
     const { data: project, error: projectError } = await supabase.from("projects").select("automation_base_url").eq("id",body.projectId).single();
     if(projectError)throw projectError;
-    if(!project.automation_base_url)return fail("Set an automation target URL in workspace settings before starting a run.");
+    if (body.websiteUrl) {
+      let target;
+      try { target = new URL(body.websiteUrl); } catch { return fail("Enter a valid website URL."); }
+      if (!["http:","https:"].includes(target.protocol) || target.username || target.password) return fail("Enter a valid HTTP or HTTPS website URL.");
+      if (target.protocol === "http:" && !["localhost","127.0.0.1"].includes(target.hostname)) return fail("Use HTTPS for a public website.");
+      const { error: saveError } = await supabase.from("projects").update({automation_base_url:target.href}).eq("id",body.projectId);
+      if (saveError) throw saveError;
+    }
+    if(!project.automation_base_url && !body.websiteUrl)return fail("Enter a website URL to scan.");
     const workflow = process.env.GITHUB_AUTOMATION_WORKFLOW || "automation.yml";
     const branch=body.branch||process.env.GITHUB_AUTOMATION_BRANCH||"main";
     const { data: run, error: insertError } = await supabase.from("test_runs").insert({ project_id: body.projectId, cycle_id: body.cycleId || null, triggered_by: user.id, source, status: "queued", branch }).select("*").single();

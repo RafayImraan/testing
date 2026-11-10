@@ -23,6 +23,7 @@ on:
           - playwright
           - selenium
           - newman
+          - website
 
 permissions:
   contents: read
@@ -46,7 +47,7 @@ jobs:
       - name: Install application and automation dependencies
         run: npm ci --no-audit --no-fund
       - name: Install Chromium
-        if: inputs.source == 'playwright'
+        if: inputs.source == 'playwright' || inputs.source == 'website'
         run: npx playwright install --with-deps chromium
       - name: Run selected test cases
         run: node automation/runner.mjs

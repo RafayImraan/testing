@@ -5,6 +5,7 @@ TestTrace brings manual test case management, task assignment, release cycles, b
 ## Local setup
 
 1. Create a Supabase project and run [`supabase/schema.sql`](supabase/schema.sql) in its SQL editor.
+   When upgrading an existing workspace, run the updated schema again to enable website scan records.
 2. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and a random `CRON_SECRET`.
 3. In Supabase Authentication settings, allow the local callback `http://localhost:3000/auth/callback` and enable email/password sign-in.
 4. Install and start the app:
